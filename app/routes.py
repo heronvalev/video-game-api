@@ -246,3 +246,20 @@ def get_games_by_tag():
         }, ensure_ascii=False), 
         mimetype='application/json'
     )
+
+# Tags endpoint: list all available SteamSpy tags
+@api_bp.route("/tags", methods=["GET"])
+def get_tags():
+    
+    # Query all tags from the database
+    tags = db.session.execute(
+        select(SteamSpyTag.tag_name).order_by(SteamSpyTag.tag_name)
+    ).scalars().all()
+
+    return Response(
+        json.dumps({
+            "count": len(tags),
+            "results": tags
+        }, ensure_ascii=False),
+        mimetype='application/json'
+    )
