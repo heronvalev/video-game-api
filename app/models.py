@@ -1,80 +1,92 @@
+from sqlalchemy import Integer, String, Text, Float
+from sqlalchemy.orm import Mapped, mapped_column
 from . import db
 
 # Create SQLAlchemy models from the database
 class Game(db.Model):
     __tablename__ = "games"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    release_date = db.Column(db.String)
-    developer = db.Column(db.String)
-    publisher = db.Column(db.String)
-    english = db.Column(db.Integer)
-    short_description = db.Column(db.Text)
-    price = db.Column(db.Float)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    release_date: Mapped[str] = mapped_column(String)
+    developer: Mapped[str] = mapped_column(String)
+    publisher: Mapped[str] = mapped_column(String)
+    english: Mapped[int] = mapped_column(Integer)
+    short_description: Mapped[str] = mapped_column(Text)
+    price: Mapped[float] = mapped_column(Float)
+
 
 class Rating(db.Model):
     __tablename__ = "ratings"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    positive_ratings = db.Column(db.Integer)
-    negative_ratings = db.Column(db.Integer)
-    average_playtime = db.Column(db.Integer)
-    median_playtime = db.Column(db.Integer)
-    owners = db.Column(db.Text)
-    achievements = db.Column(db.Integer)
-    required_age = db.Column(db.Integer)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    positive_ratings: Mapped[int] = mapped_column(Integer)
+    negative_ratings: Mapped[int] = mapped_column(Integer)
+    average_playtime: Mapped[int] = mapped_column(Integer)
+    median_playtime: Mapped[int] = mapped_column(Integer)
+    owners: Mapped[str] = mapped_column(String)
+    achievements: Mapped[int] = mapped_column(Integer)
+    required_age: Mapped[int] = mapped_column(Integer)
+
 
 class GameMedia(db.Model):
     __tablename__ = "game_media"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    header_image = db.Column(db.Text)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    header_image: Mapped[str] = mapped_column(String)
+
 
 class Category(db.Model):
     __tablename__ = "categories"
 
-    category_id = db.Column(db.Integer, primary_key=True)
-    category_name = db.Column(db.Text)
+    category_id: Mapped[int] = mapped_column(primary_key=True)
+    category_name: Mapped[str] = mapped_column(String)
+
 
 class GameCategory(db.Model):
     __tablename__ = "game_categories"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    category_id = db.Column(db.Integer, primary_key=True)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    category_id: Mapped[int] = mapped_column(primary_key=True)
+
 
 class Genre(db.Model):
     __tablename__ = "genres"
 
-    genre_id = db.Column(db.Integer, primary_key=True)
-    genre_name = db.Column(db.Text)
+    genre_id: Mapped[int] = mapped_column(primary_key=True)
+    genre_name: Mapped[str] = mapped_column(String)
+
 
 class GameGenre(db.Model):
     __tablename__ = "game_genres"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    genre_id = db.Column(db.Integer, primary_key=True)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    genre_id: Mapped[int] = mapped_column(primary_key=True)
+
 
 class Platform(db.Model):
     __tablename__ = "platforms"
 
-    platform_id = db.Column(db.Integer, primary_key=True)
-    platform_name = db.Column(db.Text)
+    platform_id: Mapped[int] = mapped_column(primary_key=True)
+    platform_name: Mapped[str] = mapped_column(String)
+
 
 class GamePlatform(db.Model):
     __tablename__ = "game_platforms"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    platform_id = db.Column(db.Integer, primary_key=True)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    platform_id: Mapped[int] = mapped_column(primary_key=True)
+
 
 class SteamSpyTag(db.Model):
     __tablename__ = "steamspy_tags"
 
-    tag_id = db.Column(db.Integer, primary_key=True)
-    tag_name = db.Column(db.Text)
+    tag_id: Mapped[int] = mapped_column(primary_key=True)
+    tag_name: Mapped[str] = mapped_column(String)
+
 
 class GameSteamSpyTag(db.Model):
     __tablename__ = "game_steamspy_tags"
 
-    appid = db.Column(db.Integer, primary_key=True)
-    steamspy_tag_id = db.Column(db.Integer, primary_key=True)
+    appid: Mapped[int] = mapped_column(primary_key=True)
+    steamspy_tag_id: Mapped[int] = mapped_column(primary_key=True)
