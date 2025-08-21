@@ -24,7 +24,7 @@ api_bp = Blueprint("api", __name__)
 @api_bp.route("/games", methods=["GET"])
 def get_games():
 
-    # Grab query parameters
+    # Fetch query parameters
     name = request.args.get("name")
     release_year = request.args.get("release_year")
     platform = request.args.get("platform")
@@ -35,6 +35,10 @@ def get_games():
     price_min = request.args.get("price_min", type=float)
     price_max = request.args.get("price_max", type=float)
 
+    # Require the 'name' parameter
+    if not name:
+        return jsonify({"error": "The 'name' parameter is required"}), 400
+
     # Base query selecting the tables
     stmt = (
         select(Game, Rating, GameMedia)
@@ -42,7 +46,7 @@ def get_games():
         .join(GameMedia, Game.appid == GameMedia.appid)
     )
 
-    # Apply filters
+    # Optional filters
     if name:
         stmt = stmt.where(Game.name.ilike(f"%{name}%"))
 
@@ -93,8 +97,7 @@ def get_games():
 
         # Calculate overall rating as a percentage
         if rating.positive_ratings + rating.negative_ratings > 0:
-            overall_rating = round(
-                (rating.positive_ratings / (rating.positive_ratings + rating.negative_ratings)) * 100, 2)
+            overall_rating = (rating.positive_ratings / (rating.positive_ratings + rating.negative_ratings))  * 100
         else:
             overall_rating = None
 
@@ -133,7 +136,7 @@ def get_games():
             "developer": game.developer,
             "publisher": game.publisher,
             "price": game.price,
-            "overall_rating": overall_rating,
+            "overall_rating": round(overall_rating, 2),
             "header_image": media.header_image,
             "genres": genres,
             "categories": categories,
@@ -144,6 +147,100 @@ def get_games():
     
     return Response(
         json.dumps({
+            "count": len(games_list),
+            "results": games_list
+        }, ensure_ascii=False), 
+        mimetype='application/json'
+    )
+
+# Games by Tag endpoint: search games with filters based on SteamSpy Tag
+@api_bp.route("/games/by-tag", methods=["GET"])
+def get_games_by_tag():
+
+    # Fetch query parameters
+    tag = request.args.get("tag")
+    platform = request.args.get("platform")
+    rating_min = request.args.get("rating_min", type=float)
+    rating_max = request.args.get("rating_max", type=float)
+    price_min = request.args.get("price_min", type=float)
+    price_max = request.args.get("price_max", type=float)
+
+    # Require the "tag" parameter
+    if not tag:
+        return jsonify({"error": "The 'tag' parameter is required."}), 400
+    
+    # Base query selecting the tables
+    stmt = (
+        select(Game, Rating, GameMedia)
+        .join(Rating, Game.appid == Rating.appid)
+        .join(GameMedia, Game.appid == GameMedia.appid)
+        .join(GameSteamSpyTag, Game.appid == GameSteamSpyTag.appid)
+        .join(SteamSpyTag, GameSteamSpyTag.steamspy_tag_id == SteamSpyTag.tag_id)
+        .where(SteamSpyTag.tag_name.ilike(tag))
+    )
+
+    # Optional filters
+    if platform:
+        stmt = (
+            stmt.join(GamePlatform, Game.appid == GamePlatform.appid)
+                .join(Platform, GamePlatform.platform_id == Platform.platform_id)
+                .where(Platform.platform_name == platform)
+        )
+
+    if rating_min is not None:
+        stmt = stmt.where(
+            ((Rating.positive_ratings / (Rating.positive_ratings + Rating.negative_ratings)) * 100) >= rating_min
+        )
+    if rating_max is not None:
+        stmt = stmt.where(
+            ((Rating.positive_ratings / (Rating.positive_ratings + Rating.negative_ratings)) * 100) <= rating_max
+        )
+
+    if price_min is not None:
+        stmt = stmt.where(Game.price >= price_min)
+    if price_max is not None:
+        stmt = stmt.where(Game.price <= price_max)
+
+    results = db.session.execute(stmt).all()
+
+    # Prepare the JSON output
+    games_list = []
+
+    
+    for game, rating, media in results:
+
+        # Calculate overall rating as a percentage
+        if rating.positive_ratings + rating.negative_ratings > 0:
+            overall_rating = (rating.positive_ratings /
+                            (rating.positive_ratings + rating.negative_ratings)) * 100
+        else:
+            overall_rating = None
+
+        # Platforms
+        platforms = (
+            db.session.execute(
+                select(Platform.platform_name)
+                .join(GamePlatform, Platform.platform_id == GamePlatform.platform_id)
+                .where(GamePlatform.appid == game.appid)
+            ).scalars().all()
+        )
+
+        # Build game dictionary
+        game_dict = {
+            "appid": game.appid,
+            "name": game.name,
+            "release_date": game.release_date,
+            "price": game.price,
+            "overall_rating": round(overall_rating, 2),
+            "header_image": media.header_image,
+            "platforms": platforms
+        }
+
+        games_list.append(game_dict)
+
+    return Response(
+        json.dumps({
+            "tag": tag,
             "count": len(games_list),
             "results": games_list
         }, ensure_ascii=False), 
