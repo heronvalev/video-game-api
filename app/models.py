@@ -1,5 +1,6 @@
 from sqlalchemy import Integer, String, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column
+from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 
 # Create SQLAlchemy models from the database
@@ -90,3 +91,20 @@ class GameSteamSpyTag(db.Model):
 
     appid: Mapped[int] = mapped_column(primary_key=True)
     steamspy_tag_id: Mapped[int] = mapped_column(primary_key=True)
+
+# User authentication model
+class User(db.Model):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
+
+    def set_password(self, password: str) -> None:
+        """Hashes and sets the password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Verifies the password against the hash."""
+        return check_password_hash(self.password_hash, password)
