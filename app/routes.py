@@ -17,7 +17,7 @@ from .models import (
 import json
 from flask import Response
 
-# Create a blueprint for the API routes
+# Blueprint for the API routes
 api_bp = Blueprint("api", __name__)
 
 # Game Details endpoint: search games with filters
