@@ -1,12 +1,19 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
+from dotenv import load_dotenv
 
 # Initialise SQLAlchemy
 db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+
+    # Load environment variables from .env
+    load_dotenv()
+
+    # Secret key for CSRF
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
     # Base directory (root folder)
     base_dir = os.path.dirname(os.path.dirname(__file__))
