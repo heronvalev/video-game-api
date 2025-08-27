@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired, Email, Length
 from datetime import datetime
 from . import db
 from .models import User
+from flask_login import login_user
 
 # Blueprint for user authentication routes (login/register)
 auth_bp = Blueprint("auth", __name__)
@@ -54,4 +55,26 @@ def register():
 # Log in route
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html", current_year = datetime.now().year)
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        
+        # Find user via email
+        user = User.query.filter_by(email=form.email.data).first()
+
+        if user is None:
+            flash("No account found with that email.", "danger")
+            return redirect(url_for("auth.login"))
+        
+        # Check password
+        if not user.check_password(form.password.data):
+            flash("Incorrect password. Please try again.", "danger")
+            return redirect(url_for("auth.login"))
+        
+        # If credentials are correct
+        login_user(user)
+        flash("Logged in successfully!", "success")
+        return redirect(url_for("main.home"))
+    
+    return render_template("login.html", current_year = datetime.now().year, form=form)

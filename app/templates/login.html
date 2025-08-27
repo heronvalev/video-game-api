@@ -4,21 +4,23 @@
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
 
-    <form class="p-4 bg-dark rounded" style="width: 100%; max-width: 400px;">
+    <form method="POST" class="p-4 bg-dark rounded" style="width: 100%; max-width: 400px;">
         
+        {{ form.hidden_tag() }}
+
         <h1 class="h3 mb-4 text-light fw-normal text-center">Please sign in</h1>
 
         <div class="form-floating mb-3">
-            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-            <label for="floatingInput">Email address</label>
+            {{ form.email(class="form-control", placeholder="name@example.com") }}
+            {{ form.email.label(class="form-label") }}
         </div>
 
         <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-            <label for="floatingPassword">Password</label>
+            {{ form.password(class="form-control", placeholder="Password") }}
+            {{ form.password.label(class="form-label") }}
         </div>
         
-        <button class="btn btn-primary w-100 py-2" type="submit">Log in</button>
+        {{ form.submit(class="btn btn-primary w-100 py-2") }}
 
     </form>
 

@@ -2,9 +2,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
+from flask_login import LoginManager
 
 # Initialise SQLAlchemy
 db = SQLAlchemy()
+
+# Initialise LoginManager
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +29,16 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
+
+    # Set up login manager
+    login_manager.login_view = "auth.login"
+    login_manager.init_app(app)
+
+    from .models import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
     # Import and register routes
     from .routes import api_bp

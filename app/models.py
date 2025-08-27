@@ -2,6 +2,7 @@ from sqlalchemy import Integer, String, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
+from flask_login import UserMixin
 
 # Create SQLAlchemy models from the database
 class Game(db.Model):
@@ -93,7 +94,7 @@ class GameSteamSpyTag(db.Model):
     steamspy_tag_id: Mapped[int] = mapped_column(primary_key=True)
 
 # User authentication model
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
