@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Email, Length
 from datetime import datetime
 from . import db
 from .models import User
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 
 # Blueprint for user authentication routes (login/register)
 auth_bp = Blueprint("auth", __name__)
@@ -78,3 +78,11 @@ def login():
         return redirect(url_for("main.home"))
     
     return render_template("login.html", current_year = datetime.now().year, form=form)
+
+# Log out route
+@auth_bp.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("main.home"))
