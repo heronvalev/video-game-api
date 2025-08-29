@@ -39,3 +39,7 @@ def home():
         token_expired=token_expired,
         current_user=current_user
     )
+
+@main_bp.route("/about")
+def about():
+    return render_template("about.html", current_year=datetime.now().year)
