@@ -1,14 +1,31 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import db
 from .models import User
 from flask_login import login_user, logout_user, login_required
+import jwt
+
 
 # Blueprint for user authentication routes (login/register)
 auth_bp = Blueprint("auth", __name__)
+
+# Generate JWT token
+def generate_token(user_id, expires_in=3600):
+
+    expiration = datetime.utcnow() + timedelta(seconds=expires_in)
+
+    payload = {
+        "user_id": user_id,
+        "exp": expiration
+    }
+
+    # Encode the token with app secret key
+    token = jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
+
+    return token
 
 # WTForms classes for user registration and login
 class RegisterForm(FlaskForm):

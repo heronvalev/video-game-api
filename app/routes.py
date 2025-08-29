@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, request, current_app
 from sqlalchemy import select
 from . import db
 from .models import (
@@ -12,17 +12,63 @@ from .models import (
     GameCategory,
     Platform,
     GamePlatform,
-    GameMedia
+    GameMedia,
+    User
 )
 import json
 from flask import Response
+from functools import wraps
+import jwt
+
+# Token authorisation decorator function
+def token_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        # Get the token from the Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            return jsonify({"error": "Authorization header is missing"}), 401
+        
+        # Expected header format: "Bearer <token>"
+        parts = auth_header.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            return jsonify({"error": "Invalid authorization header format"}), 401
+            
+        token = parts[1]
+
+        try:
+            # Decode the token using the app secret key
+            payload = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+            
+            # Extract the user ID from the token payload
+            user_id = payload.get("user_id")
+            if not user_id:
+                return jsonify({"error": "Token missing user information"}), 401
+
+            # Fetch the user from the database
+            user = User.query.get(user_id)
+            if not user:
+                return jsonify({"error": "User not found"}), 401
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 401
+        
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+        # Call the original route function and pass the user as a keyword argument
+        return f(user=user, *args, **kwargs)
+    
+    return wrapper
+    
 
 # Blueprint for the API routes
 api_bp = Blueprint("api", __name__)
 
 # Game Details endpoint: search games with filters
 @api_bp.route("/games", methods=["GET"])
-def get_games():
+@token_required
+def get_games(user):
 
     # Fetch query parameters
     name = request.args.get("name")
@@ -155,7 +201,8 @@ def get_games():
 
 # Games by Tag endpoint: search games with filters based on SteamSpy Tag
 @api_bp.route("/games/by-tag", methods=["GET"])
-def get_games_by_tag():
+@token_required
+def get_games_by_tag(user):
 
     # Fetch query parameters
     tag = request.args.get("tag")
@@ -249,7 +296,8 @@ def get_games_by_tag():
 
 # Tags endpoint: list all available SteamSpy tags
 @api_bp.route("/tags", methods=["GET"])
-def get_tags():
+@token_required
+def get_tags(user):
     
     # Query all tags from the database
     tags = db.session.execute(
