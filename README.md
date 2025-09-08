@@ -246,7 +246,9 @@ This project is licensed under the MIT License.
 ## Contributing
 Feel free to open issues or submit pull requests.
 
-## Live demo
+## Live Demo
+
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://heronvalev.pythonanywhere.com/)
 
 
 
