@@ -22,7 +22,7 @@ This project uses data sourced from Kaggle (https://www.kaggle.com/datasets/nikd
 
 ## Installation
 
-1. Clone this repository.
+1. Clone the repository.
 2. Create and activate a virtual environment.
 3. Install dependencies (requirements.txt).
 4. The project uses a `.env` file for configuration. Create a `.env` file in the root directory of the project and add the variable `SECRET_KEY` with the value being a secure string of personal choice.
@@ -35,6 +35,31 @@ python init_db.py
 
 ```bash
 python run.py
+```
+## Docker installation (alternative)
+
+1. Clone the repository.
+2. Create a `.env` file in the project root and add `SECRET_KEY` (same as the standard installation).
+3. Build and start the container:
+
+```bash
+docker compose up --build
+```
+
+4. First-time only - initialise the auth database in a second terminal (creates tables in the Docker named volume):
+
+```bash
+docker compose run --rm web python init_db.py
+```
+
+5. Open the app:
+
+http://127.0.0.1:5000/
+
+6. Stop the container:
+
+```bash
+docker compose down
 ```
 
 ## Using the API

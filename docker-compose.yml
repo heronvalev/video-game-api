@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data:ro
+      - auth_data:/app/instance
+
+volumes:
+  auth_data:
