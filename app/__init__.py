@@ -13,19 +13,29 @@ login_manager = LoginManager()
 def create_app():
     app = Flask(__name__)
 
+    # Base directory (project root)
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    
     # Load environment variables from .env
-    load_dotenv()
+    load_dotenv(os.path.join(base_dir, ".env"))
 
     # Secret key for CSRF
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
-    # Base directory (root folder)
-    base_dir = os.path.dirname(os.path.dirname(__file__))
+    # Ensure instance folder exists (for auth DB)
+    os.makedirs(app.instance_path, exist_ok=True)
 
-    # Configure SQLite database
-    db_path = os.path.join(base_dir, "data", "steam.sqlite")
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Default DB (auth/users)
+    auth_db_path = os.path.join(app.instance_path, "auth.sqlite")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{auth_db_path}"
+
+    # Games DB (static)
+    games_db_path = os.path.join(base_dir, "data", "steam.sqlite")
+    app.config["SQLALCHEMY_BINDS"] = {
+        "games": f"sqlite:///{games_db_path}",
+    }
+
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
     db.init_app(app)
@@ -38,7 +48,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     # Import and register routes
     from .routes import api_bp

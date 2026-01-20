@@ -46,7 +46,7 @@ def token_required(f):
                 return jsonify({"error": "Token missing user information"}), 401
 
             # Fetch the user from the database
-            user = User.query.get(user_id)
+            user = db.session.get(User, int(user_id))
             if not user:
                 return jsonify({"error": "User not found"}), 401
 

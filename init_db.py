@@ -1,6 +1,7 @@
-from run import app
-from app import db
+from app import create_app, db
+
+app = create_app()
 
 with app.app_context():
     db.create_all()
-    print("Database tables created.")
+    print("Auth database tables created.")

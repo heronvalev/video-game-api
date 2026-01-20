@@ -6,6 +6,7 @@ from flask_login import UserMixin
 
 # Create SQLAlchemy models from the database
 class Game(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "games"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -19,6 +20,7 @@ class Game(db.Model):
 
 
 class Rating(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "ratings"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -32,6 +34,7 @@ class Rating(db.Model):
 
 
 class GameMedia(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "game_media"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -39,6 +42,7 @@ class GameMedia(db.Model):
 
 
 class Category(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "categories"
 
     category_id: Mapped[int] = mapped_column(primary_key=True)
@@ -46,6 +50,7 @@ class Category(db.Model):
 
 
 class GameCategory(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "game_categories"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -53,6 +58,7 @@ class GameCategory(db.Model):
 
 
 class Genre(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "genres"
 
     genre_id: Mapped[int] = mapped_column(primary_key=True)
@@ -60,6 +66,7 @@ class Genre(db.Model):
 
 
 class GameGenre(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "game_genres"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -67,6 +74,7 @@ class GameGenre(db.Model):
 
 
 class Platform(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "platforms"
 
     platform_id: Mapped[int] = mapped_column(primary_key=True)
@@ -74,6 +82,7 @@ class Platform(db.Model):
 
 
 class GamePlatform(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "game_platforms"
 
     appid: Mapped[int] = mapped_column(primary_key=True)
@@ -81,6 +90,7 @@ class GamePlatform(db.Model):
 
 
 class SteamSpyTag(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "steamspy_tags"
 
     tag_id: Mapped[int] = mapped_column(primary_key=True)
@@ -88,6 +98,7 @@ class SteamSpyTag(db.Model):
 
 
 class GameSteamSpyTag(db.Model):
+    __bind_key__ = "games"
     __tablename__ = "game_steamspy_tags"
 
     appid: Mapped[int] = mapped_column(primary_key=True)

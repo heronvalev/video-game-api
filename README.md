@@ -26,7 +26,16 @@ This project uses data sourced from Kaggle (https://www.kaggle.com/datasets/nikd
 2. Create and activate a virtual environment.
 3. Install dependencies (requirements.txt).
 4. The project uses a `.env` file for configuration. Create a `.env` file in the root directory of the project and add the variable `SECRET_KEY` with the value being a secure string of personal choice.
-5. Execute run.py in the root.
+5. Initialise the auth database (creates `instance/auth.sqlite`):
+
+```bash
+python init_db.py
+```
+6. Start the app:
+
+```bash
+python run.py
+```
 
 ## Using the API
 
