@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, request, flash, session
 from datetime import datetime, timedelta
+
+from flask import Blueprint, flash, render_template, request, session
 from flask_login import current_user
+
 from app.auth import generate_token
+
 
 # Blueprint for home page
 main_bp = Blueprint("main", __name__)

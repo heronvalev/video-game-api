@@ -1,24 +1,26 @@
-from flask import Blueprint, request, jsonify, request, current_app
+import json
+from functools import wraps
+
+import jwt
+from flask import Blueprint, Response, current_app, jsonify, request
 from sqlalchemy import select
+
 from . import db
 from .models import (
-    Game,
-    Rating,
-    Genre,
-    GameGenre,
-    SteamSpyTag,
-    GameSteamSpyTag,
     Category,
+    Game,
     GameCategory,
-    Platform,
-    GamePlatform,
+    GameGenre,
     GameMedia,
-    User
+    GamePlatform,
+    GameSteamSpyTag,
+    Genre,
+    Platform,
+    Rating,
+    SteamSpyTag,
+    User,
 )
-import json
-from flask import Response
-from functools import wraps
-import jwt
+
 
 # Token authorisation decorator function
 def token_required(f):

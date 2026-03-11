@@ -1,8 +1,10 @@
-from sqlalchemy import Integer, String, Text, Float
-from sqlalchemy.orm import Mapped, mapped_column
-from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
 from flask_login import UserMixin
+from sqlalchemy import Float, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from . import db
+
 
 # Create SQLAlchemy models from the database
 class Game(db.Model):

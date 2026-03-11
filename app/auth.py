@@ -1,12 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, Length
 from datetime import datetime, timedelta
+
+import jwt
+from flask import Blueprint, current_app, flash, redirect, render_template, url_for
+from flask_login import login_required, login_user, logout_user
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+
 from . import db
 from .models import User
-from flask_login import login_user, logout_user, login_required
-import jwt
 
 
 # Blueprint for user authentication routes (login/register)
