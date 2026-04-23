@@ -67,6 +67,7 @@ def token_required(f):
 # Blueprint for the API routes
 api_bp = Blueprint("api", __name__)
 
+
 # Game Details endpoint: search games with filters
 @api_bp.route("/games", methods=["GET"])
 @token_required
@@ -94,10 +95,10 @@ def get_games(user):
         .join(GameMedia, Game.appid == GameMedia.appid)
     )
 
-    # Optional filters
-    if name:
-        stmt = stmt.where(Game.name.ilike(f"%{name}%"))
+    # Add the required name filter
+    stmt = stmt.where(Game.name.ilike(f"%{name}%"))
 
+    # Optional filters
     if release_year:
         stmt = stmt.where(Game.release_date.like(f"{release_year}%"))
 
@@ -138,6 +139,63 @@ def get_games(user):
 
     results = db.session.execute(stmt).all()
 
+    # Collect all matching game IDs from the main query results
+    appids = [game.appid for game, rating, media in results]
+
+    # Fetch all platforms for the matching games in one query
+    platform_rows = (
+        db.session.execute(
+            select(GamePlatform.appid, Platform.platform_name)
+            .join(Platform, GamePlatform.platform_id == Platform.platform_id)
+            .where(GamePlatform.appid.in_(appids))
+        ).all()
+    )
+
+    # Fetch all genres for the matching games in one query
+    genre_rows = (
+        db.session.execute(
+            select(GameGenre.appid, Genre.genre_name)
+            .join(Genre, GameGenre.genre_id == Genre.genre_id)
+            .where(GameGenre.appid.in_(appids))
+        ).all()
+    )
+
+    # Fetch all categories for the matching games in one query
+    category_rows = (
+        db.session.execute(
+            select(GameCategory.appid, Category.category_name)
+            .join(Category, GameCategory.category_id == Category.category_id)
+            .where(GameCategory.appid.in_(appids))
+        ).all()
+    )
+
+    # Group platform names by app ID
+    platforms_by_appid = {}
+
+    for appid, platform_name in platform_rows:
+        if appid not in platforms_by_appid:
+            platforms_by_appid[appid] = []
+
+        platforms_by_appid[appid].append(platform_name)
+
+    # Group genre names by app ID
+    genres_by_appid = {}
+
+    for appid, genre_name in genre_rows:
+        if appid not in genres_by_appid:
+            genres_by_appid[appid] = []
+
+        genres_by_appid[appid].append(genre_name)
+
+    # Group category names by app ID
+    categories_by_appid = {}
+
+    for appid, category_name in category_rows:
+        if appid not in categories_by_appid:
+            categories_by_appid[appid] = []
+
+        categories_by_appid[appid].append(category_name)
+
     # Prepare the JSON output
     games_list = []
 
@@ -150,31 +208,13 @@ def get_games(user):
             overall_rating = None
 
         # Platforms
-        platforms = (
-            db.session.execute(
-                select(Platform.platform_name)
-                .join(GamePlatform, Platform.platform_id == GamePlatform.platform_id)
-                .where(GamePlatform.appid == game.appid)
-            ).scalars().all()
-        )
+        platforms = platforms_by_appid.get(game.appid, [])
 
         # Genres
-        genres = (
-            db.session.execute(
-                select(Genre.genre_name)
-                .join(GameGenre, Genre.genre_id == GameGenre.genre_id)
-                .where(GameGenre.appid == game.appid)
-            ).scalars().all()
-        )
+        genres = genres_by_appid.get(game.appid, [])
 
         # Categories
-        categories = (
-            db.session.execute(
-                select(Category.category_name)
-                .join(GameCategory, Category.category_id == GameCategory.category_id)
-                .where(GameCategory.appid == game.appid)
-            ).scalars().all()
-        )
+        categories = categories_by_appid.get(game.appid, [])
 
         # Build the basic game dictionary
         game_dict = {
@@ -184,7 +224,7 @@ def get_games(user):
             "developer": game.developer,
             "publisher": game.publisher,
             "price": game.price,
-            "overall_rating": round(overall_rating, 2),
+            "overall_rating": round(overall_rating, 2) if overall_rating is not None else None,
             "header_image": media.header_image,
             "genres": genres,
             "categories": categories,
@@ -200,6 +240,7 @@ def get_games(user):
         }, ensure_ascii=False), 
         mimetype='application/json'
     )
+
 
 # Games by Tag endpoint: search games with filters based on SteamSpy Tag
 @api_bp.route("/games/by-tag", methods=["GET"])
@@ -295,6 +336,7 @@ def get_games_by_tag(user):
         }, ensure_ascii=False), 
         mimetype='application/json'
     )
+
 
 # Tags endpoint: list all available SteamSpy tags
 @api_bp.route("/tags", methods=["GET"])
