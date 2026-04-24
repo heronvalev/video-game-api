@@ -68,6 +68,19 @@ def token_required(f):
 api_bp = Blueprint("api", __name__)
 
 
+# Helper: group (appid, value) rows into a dictionary of lists by appid
+def group_rows_by_appid(rows):
+    grouped = {}
+
+    for appid, value in rows:
+        if appid not in grouped:
+            grouped[appid] = []
+
+        grouped[appid].append(value)
+
+    return grouped
+
+
 # Game Details endpoint: search games with filters
 @api_bp.route("/games", methods=["GET"])
 @token_required
@@ -170,31 +183,13 @@ def get_games(user):
     )
 
     # Group platform names by app ID
-    platforms_by_appid = {}
-
-    for appid, platform_name in platform_rows:
-        if appid not in platforms_by_appid:
-            platforms_by_appid[appid] = []
-
-        platforms_by_appid[appid].append(platform_name)
+    platforms_by_appid = group_rows_by_appid(platform_rows)
 
     # Group genre names by app ID
-    genres_by_appid = {}
-
-    for appid, genre_name in genre_rows:
-        if appid not in genres_by_appid:
-            genres_by_appid[appid] = []
-
-        genres_by_appid[appid].append(genre_name)
+    genres_by_appid = group_rows_by_appid(genre_rows)
 
     # Group category names by app ID
-    categories_by_appid = {}
-
-    for appid, category_name in category_rows:
-        if appid not in categories_by_appid:
-            categories_by_appid[appid] = []
-
-        categories_by_appid[appid].append(category_name)
+    categories_by_appid = group_rows_by_appid(category_rows)
 
     # Prepare the JSON output
     games_list = []
