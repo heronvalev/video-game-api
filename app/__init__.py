@@ -10,7 +10,7 @@ db = SQLAlchemy()
 # Initialise LoginManager
 login_manager = LoginManager()
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     # Base directory (project root)
@@ -36,6 +36,10 @@ def create_app():
     }
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # Optional test overrides
+    if test_config:
+        app.config.update(test_config)
 
     # Initialize extensions
     db.init_app(app)

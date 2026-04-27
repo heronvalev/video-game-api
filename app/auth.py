@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import jwt
 from flask import Blueprint, current_app, flash, redirect, render_template, url_for
@@ -17,7 +17,7 @@ auth_bp = Blueprint("auth", __name__)
 # Generate JWT token
 def generate_token(user_id, expires_in=3600):
 
-    expiration = datetime.utcnow() + timedelta(seconds=expires_in)
+    expiration = datetime.now(UTC) + timedelta(seconds=expires_in)
 
     payload = {
         "user_id": user_id,
