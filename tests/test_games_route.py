@@ -73,3 +73,41 @@ def test_get_games_returns_results_for_valid_name(client, auth_header):
         assert "platforms" in first_game
         assert "genres" in first_game
         assert "categories" in first_game
+
+
+def test_get_games_requires_auth(client):
+    response = client.get("/api/games?name=portal")
+
+    assert response.status_code == 401
+    assert response.get_json() == {"error": "Authorization header is missing"}
+
+
+def test_get_games_rejects_invalid_token(client):
+    headers = {"Authorization": "Bearer not-a-real-token"}
+    response = client.get("/api/games?name=portal", headers=headers)
+
+    assert response.status_code == 401
+    assert response.get_json() == {"error": "Invalid token"}
+
+
+def test_get_games_returns_empty_results_when_no_match(client, auth_header):
+    response = client.get("/api/games?name=thisshouldnotexist12345", headers=auth_header)
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert data["count"] == 0
+    assert data["results"] == []
+
+
+def test_get_games_filters_by_platform(client, auth_header):
+    response = client.get("/api/games?name=portal&platform=windows", headers=auth_header)
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert "results" in data
+
+    for game in data["results"]:
+        assert "platforms" in game
+        assert "windows" in game["platforms"]
